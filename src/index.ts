@@ -19,7 +19,7 @@ app.listen(port, () => {
 });
 
 // Lista na memória
-const customers = []
+const customers: { cpf: any; name: any; id: string; statement: never[]; }[] = []
 
 // base para URL/
 app.get("/", (req: Request, res: Response) => {
@@ -31,6 +31,14 @@ app.get("/", (req: Request, res: Response) => {
 // Rotas da API
 app.post("/account", (req: Request, res: Response) =>{
   const { cpf, name } = req.body;
+
+  const customerAlreadyExists = customers.some((customer) => customer.cpf === cpf);
+  
+  if (customerAlreadyExists) {
+    return res.status(400).json({
+      error: "Customer already exists!"
+    });
+  }
 
   customers.push({
     cpf,
