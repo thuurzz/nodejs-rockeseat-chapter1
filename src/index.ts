@@ -1,5 +1,6 @@
 import express, { Express, Request, Response } from 'express';
 import dotenv from 'dotenv';
+import { v4 as uuidv4 } from 'uuid';
 
 dotenv.config();
 
@@ -17,56 +18,26 @@ app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
 
+// Lista na memória
+const customers = []
 
-// Rotas da API
-
+// base para URL/
 app.get("/", (req: Request, res: Response) => {
     return res.json({
         message: "Servidor ta ON!"
     });
 })
 
-app.get("/cursos", (req: Request, res: Response) => {
-    const id: number = parseInt(req.query.id as string);
-    console.log(id);
-    return res.json(
-        ["Curso1", "Curso2", "Curso3"]
-    );
-});
+// Rotas da API
+app.post("/account", (req: Request, res: Response) =>{
+  const { cpf, name } = req.body;
 
-app.get("/cursos/:id", (req: Request, res: Response) => {
-    const id: number = parseInt(req.query.id as string);
-    console.log(id);
-    return res.json(
-        ["Curso1", "Curso2", "Curso3"]
-    );
-});
+  customers.push({
+    cpf,
+    name,
+    id: uuidv4(),
+    statement: []
+  });
 
-app.post("/cursos", (req: Request, res: Response) => {
-    const body = req.body;
-    console.log(body);
-    return res.json(
-        ["Curso1", "Curso2", "Curso3"]
-    );
-});
-
-app.put("/cursos/:id", (req: Request, res: Response) => {
-    const { id } = req.params;
-    console.log(id);
-    return res.json(
-        ["Curso1", "Curso2", "Curso3"]
-    );
-});
-
-app.patch("/cursos/:id", (req: Request, res: Response) => {
-    return res.json(
-        ["Curso1", "Curso2", "Curso3"]
-    );
-});
-
-app.delete("cursos/:id", (req: Request, res: Response) => {
-    return res.json(
-        ["Curso1", "Curso2", "Curso3"]
-    );
-});
-
+  return res.status(201).send();
+})
