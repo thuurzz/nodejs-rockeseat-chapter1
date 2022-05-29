@@ -48,6 +48,17 @@ function verifyIfExistCPF(
   return next();
 }
 
+function getBalance(statement: any[]) {
+  const balance = statement.reduce((acc, operation) => {
+    if (operation.type === "credit") {
+      return acc + operation.amount;
+    } else {
+      return acc - operation.amount;
+    }
+  }, 0);
+  return balance;
+}
+
 // Rotas da API
 app.get("/", (req: Request, res: Response) => {
   return res.json({
@@ -98,6 +109,27 @@ app.post("/deposit", verifyIfExistCPF, (req: Request, res: Response) => {
     amount,
     created_at: new Date(),
     type: "credit",
+  };
+
+  customer.statement.push(statementOperation);
+
+  return res.status(201).send();
+});
+
+app.post("/withdraw", verifyIfExistCPF, (req: Request, res: Response) => {
+  const { amount } = req.body;
+  const { customer } = req;
+
+  const balance = getBalance(customer.statement);
+
+  if (balance < amount) {
+    return res.status(400).json({ error: "Insufficient funds!" });
+  }
+
+  const statementOperation = {
+    amount,
+    created_at: new Date(),
+    type: "debit",
   };
 
   customer.statement.push(statementOperation);
