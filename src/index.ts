@@ -23,7 +23,7 @@ const customers: {
   cpf: string;
   name: string;
   id: string;
-  statement: string[];
+  statement: any[];
 }[] = [];
 
 function verifyIfExistCPF(
@@ -87,3 +87,20 @@ app.get(
     return response.status(200).json(customer.statement);
   }
 );
+
+app.post("/deposit", verifyIfExistCPF, (req: Request, res: Response) => {
+  const { description, amount } = req.body;
+
+  const { customer } = req;
+
+  const statementOperation = {
+    description,
+    amount,
+    created_at: new Date(),
+    type: "credit",
+  };
+
+  customer.statement.push(statementOperation);
+
+  return res.status(201).send();
+});
