@@ -50,8 +50,8 @@ app.post("/account", (req: Request, res: Response) =>{
   return res.status(201).json(customers);
 })
 
-app.get("/statement/:cpf", (req: Request, res: Response) => {
-  const { cpf }  = req.params;
+app.get("/statement/", (req: Request, res: Response) => {
+  const { cpf }  = req.headers;
 
   const costumer = customers.find((customer) => {
     if (customer.cpf === cpf) {
