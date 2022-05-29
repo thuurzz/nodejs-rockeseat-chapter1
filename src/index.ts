@@ -1,6 +1,6 @@
-import express, { Express, Request, Response } from 'express';
-import dotenv from 'dotenv';
-import { v4 as uuidv4 } from 'uuid';
+import express, { Express, Request, Response } from "express";
+import dotenv from "dotenv";
+import { v4 as uuidv4 } from "uuid";
 
 dotenv.config();
 
@@ -19,24 +19,52 @@ app.listen(port, () => {
 });
 
 // Lista na memória
-const customers: { cpf: string; name: string; id: string; statement: string[]; }[] = [];
+const customers: {
+  cpf: string;
+  name: string;
+  id: string;
+  statement: string[];
+}[] = [];
 
-// base para URL/
-app.get("/", (req: Request, res: Response) => {
-    return res.json({
-        message: "Servidor ta ON!"
-    });
-})
+function verifyIfExistCPF(
+  request: Request,
+  response: Response,
+  next: Function
+) {
+  const { cpf } = request.headers;
+
+  const customer = customers.find((customer) => {
+    if (customer.cpf === cpf) {
+      return customer;
+    }
+  });
+
+  if (!customer) {
+    return response.status(400).json({ error: "Customer not found!" });
+  }
+
+  request.customer = customer;
+
+  return next();
+}
 
 // Rotas da API
-app.post("/account", (req: Request, res: Response) =>{
+app.get("/", (req: Request, res: Response) => {
+  return res.json({
+    message: "Servidor ta ON!",
+  });
+});
+
+app.post("/account", (req: Request, res: Response) => {
   const { cpf, name } = req.body;
 
-  const customerAlreadyExists = customers.some((customer) => customer.cpf === cpf);
-  
+  const customerAlreadyExists = customers.some(
+    (customer) => customer.cpf === cpf
+  );
+
   if (customerAlreadyExists) {
     return res.status(400).json({
-      error: "Customer already exists!"
+      error: "Customer already exists!",
     });
   }
 
@@ -44,25 +72,18 @@ app.post("/account", (req: Request, res: Response) =>{
     cpf,
     name,
     id: uuidv4(),
-    statement: []
+    statement: [],
   });
 
   return res.status(201).json(customers);
-})
+});
 
-app.get("/statement/", (req: Request, res: Response) => {
-  const { cpf }  = req.headers;
+app.get(
+  "/statement/",
+  verifyIfExistCPF,
+  (request: Request, response: Response) => {
+    const { customer } = request;
 
-  const costumer = customers.find((customer) => {
-    if (customer.cpf === cpf) {
-      return customer
-    }
-  });
-
-  if (costumer) {
-    return res.json(costumer.statement);
-  } else {
-    return res.status(400).json({ error: "Customer not found!" });
+    return response.status(200).json(customer.statement);
   }
-})
-
+);
