@@ -19,7 +19,7 @@ app.listen(port, () => {
 });
 
 // Lista na memória
-const customers: { cpf: any; name: any; id: string; statement: string[]; }[] = [];
+const customers: { cpf: string; name: string; id: string; statement: string[]; }[] = [];
 
 // base para URL/
 app.get("/", (req: Request, res: Response) => {
@@ -47,13 +47,15 @@ app.post("/account", (req: Request, res: Response) =>{
     statement: []
   });
 
-  return res.status(201).send();
+  return res.status(201).json(customers);
 })
 
 app.get("/statement/:cpf", (req: Request, res: Response) => {
-  const { cpf } = req.params;
+  const { cpf }  = req.params;
 
-  const costumer = customers.find((customer) => { customer.cpf == cpf });
-  
-  return res.json(costumer?.statement);
-} )
+  const costumer = customers.find((customer) => {
+    customer.cpf === cpf
+    return customer
+  });
+    return res.json(costumer?.statement);
+})
