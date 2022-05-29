@@ -60,21 +60,21 @@ function getBalance(statement: any[]) {
 }
 
 // Rotas da API
-app.get("/", (req: Request, res: Response) => {
-  return res.json({
+app.get("/", (request: Request, response: Response) => {
+  return response.json({
     message: "Servidor ta ON!",
   });
 });
 
-app.post("/account", (req: Request, res: Response) => {
-  const { cpf, name } = req.body;
+app.post("/account", (request: Request, response: Response) => {
+  const { cpf, name } = request.body;
 
   const customerAlreadyExists = customers.some(
     (customer) => customer.cpf === cpf
   );
 
   if (customerAlreadyExists) {
-    return res.status(400).json({
+    return response.status(400).json({
       error: "Customer already exists!",
     });
   }
@@ -86,7 +86,7 @@ app.post("/account", (req: Request, res: Response) => {
     statement: [],
   });
 
-  return res.status(201).json(customers);
+  return response.status(201).json(customers);
 });
 
 app.get(
@@ -99,40 +99,68 @@ app.get(
   }
 );
 
-app.post("/deposit", verifyIfExistCPF, (req: Request, res: Response) => {
-  const { description, amount } = req.body;
+app.post(
+  "/deposit",
+  verifyIfExistCPF,
+  (request: Request, response: Response) => {
+    const { description, amount } = request.body;
 
-  const { customer } = req;
+    const { customer } = request;
 
-  const statementOperation = {
-    description,
-    amount,
-    created_at: new Date(),
-    type: "credit",
-  };
+    const statementOperation = {
+      description,
+      amount,
+      created_at: new Date(),
+      type: "credit",
+    };
 
-  customer.statement.push(statementOperation);
+    customer.statement.push(statementOperation);
 
-  return res.status(201).send();
-});
-
-app.post("/withdraw", verifyIfExistCPF, (req: Request, res: Response) => {
-  const { amount } = req.body;
-  const { customer } = req;
-
-  const balance = getBalance(customer.statement);
-
-  if (balance < amount) {
-    return res.status(400).json({ error: "Insufficient funds!" });
+    return response.status(201).send();
   }
+);
 
-  const statementOperation = {
-    amount,
-    created_at: new Date(),
-    type: "debit",
-  };
+app.post(
+  "/withdraw",
+  verifyIfExistCPF,
+  (request: Request, response: Response) => {
+    const { amount } = request.body;
+    const { customer } = request;
 
-  customer.statement.push(statementOperation);
+    const balance = getBalance(customer.statement);
 
-  return res.status(201).send();
-});
+    if (balance < amount) {
+      return response.status(400).json({ error: "Insufficient funds!" });
+    }
+
+    const statementOperation = {
+      amount,
+      created_at: new Date(),
+      type: "debit",
+    };
+
+    customer.statement.push(statementOperation);
+
+    return response.status(201).send();
+  }
+);
+
+app.get(
+  "/statement/date",
+  verifyIfExistCPF,
+  (request: Request, response: Response) => {
+    const { customer } = request;
+
+    const { date } = request.query;
+
+    const dateFormat = new Date(date + " 00:00");
+
+    const statementByDate = customer.statement.filter(
+      (statement) =>
+        statement.created_at.toDateString() ==
+        new Date(dateFormat).toDateString()
+    );
+
+    return response.status(200).json(statementByDate);
+  }
+);
