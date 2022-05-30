@@ -21,14 +21,6 @@ app.listen(port, () => {
   console.log(`⚡️[server]: Server is running at http://localhost:${port}`);
 });
 
-// Lista na memória
-// const customers: {
-//   cpf: string;
-//   name: string;
-//   id: string;
-//   statement: any[];
-// }[] = [];
-
 const customers: Customer[] = [];
 
 function verifyIfExistCPF(
@@ -93,13 +85,6 @@ app.post("/account", (request: Request, response: Response) => {
 
   customers.push(customer);
 
-  // customers.push({
-  //   cpf,
-  //   name,
-  //   id: uuidv4(),
-  //   statement: [],
-  // });
-
   return response.status(201).json(customers);
 });
 
@@ -120,13 +105,6 @@ app.post(
     const { description, amount } = request.body;
 
     const { customer } = request;
-
-    // const statementOperation = {
-    //   description,
-    //   amount,
-    //   created_at: new Date(),
-    //   type: "credit",
-    // };
 
     const statementOperation: Operation = {
       description: description,
@@ -153,12 +131,6 @@ app.post(
     if (balance < amount) {
       return response.status(400).json({ error: "Insufficient funds!" });
     }
-
-    // const statementOperation = {
-    //   amount,
-    //   created_at: new Date(),
-    //   type: "debit",
-    // };
 
     const statementOperation: Operation = {
       amount: amount,
@@ -244,13 +216,6 @@ app.get(
       name: customer.name,
       balance: valueBalance,
     };
-
-    // return response.status(200).json({
-    //   cpf: customer.cpf,
-    //   name: customer.name,
-    //   balance: valueBalance,
-    // });
-
     return response.status(200).json(balance);
   }
 );
