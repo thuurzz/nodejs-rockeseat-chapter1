@@ -164,3 +164,42 @@ app.get(
     return response.status(200).json(statementByDate);
   }
 );
+
+app.put(
+  "/account",
+  verifyIfExistCPF,
+  (request: Request, response: Response) => {
+    const { name } = request.body;
+
+    const { customer } = request;
+
+    customer.name = name;
+
+    return response.status(201).send();
+  }
+);
+
+app.get(
+  "/account",
+  verifyIfExistCPF,
+  (request: Request, response: Response) => {
+    const { customer } = request;
+
+    return response.status(200).json(customer);
+  }
+);
+
+app.delete(
+  "/account",
+  verifyIfExistCPF,
+  (request: Request, response: Response) => {
+    const { customer } = request;
+
+    const index = customers.indexOf(customer);
+    customers.splice(index, 1);
+
+    return response.status(200).json({
+      accounts: customers,
+    });
+  }
+);
