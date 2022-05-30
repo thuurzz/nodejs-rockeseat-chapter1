@@ -1,6 +1,9 @@
 import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
 import { v4 as uuidv4 } from "uuid";
+import { Customer } from "../src/models/customer";
+import { Operation } from "../src/models/operation";
+import { Balance } from "../src/models/balance";
 
 dotenv.config();
 
@@ -19,12 +22,14 @@ app.listen(port, () => {
 });
 
 // Lista na memória
-const customers: {
-  cpf: string;
-  name: string;
-  id: string;
-  statement: any[];
-}[] = [];
+// const customers: {
+//   cpf: string;
+//   name: string;
+//   id: string;
+//   statement: any[];
+// }[] = [];
+
+const customers: Customer[] = [];
 
 function verifyIfExistCPF(
   request: Request,
@@ -79,12 +84,21 @@ app.post("/account", (request: Request, response: Response) => {
     });
   }
 
-  customers.push({
-    cpf,
-    name,
+  const customer: Customer = {
+    cpf: cpf,
+    name: name,
     id: uuidv4(),
     statement: [],
-  });
+  };
+
+  customers.push(customer);
+
+  // customers.push({
+  //   cpf,
+  //   name,
+  //   id: uuidv4(),
+  //   statement: [],
+  // });
 
   return response.status(201).json(customers);
 });
@@ -107,9 +121,16 @@ app.post(
 
     const { customer } = request;
 
-    const statementOperation = {
-      description,
-      amount,
+    // const statementOperation = {
+    //   description,
+    //   amount,
+    //   created_at: new Date(),
+    //   type: "credit",
+    // };
+
+    const statementOperation: Operation = {
+      description: description,
+      amount: amount,
       created_at: new Date(),
       type: "credit",
     };
@@ -133,8 +154,14 @@ app.post(
       return response.status(400).json({ error: "Insufficient funds!" });
     }
 
-    const statementOperation = {
-      amount,
+    // const statementOperation = {
+    //   amount,
+    //   created_at: new Date(),
+    //   type: "debit",
+    // };
+
+    const statementOperation: Operation = {
+      amount: amount,
       created_at: new Date(),
       type: "debit",
     };
@@ -210,12 +237,20 @@ app.get(
   (request: Request, response: Response) => {
     const { customer } = request;
 
-    const balance = getBalance(customer.statement);
+    const valueBalance = getBalance(customer.statement);
 
-    return response.status(200).json({
+    const balance: Balance = {
       cpf: customer.cpf,
       name: customer.name,
-      balance: balance,
-    });
+      balance: valueBalance,
+    };
+
+    // return response.status(200).json({
+    //   cpf: customer.cpf,
+    //   name: customer.name,
+    //   balance: valueBalance,
+    // });
+
+    return response.status(200).json(balance);
   }
 );
