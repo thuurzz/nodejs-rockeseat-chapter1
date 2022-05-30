@@ -203,3 +203,19 @@ app.delete(
     });
   }
 );
+
+app.get(
+  "/balance",
+  verifyIfExistCPF,
+  (request: Request, response: Response) => {
+    const { customer } = request;
+
+    const balance = getBalance(customer.statement);
+
+    return response.status(200).json({
+      cpf: customer.cpf,
+      name: customer.name,
+      balance: balance,
+    });
+  }
+);
